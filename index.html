@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍲 Smart Recipe Finder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        nav {
+            background: #1976d2;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-right: 2rem;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        nav a:hover, nav a.active {
+            background: rgba(255,255,255,0.2);
+        }
+
+        main {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        #home {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        #home h1 {
+            font-size: 3rem;
+            color: #1976d2;
+            margin-bottom: 1rem;
+        }
+
+        #home p {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .home-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .home-card {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .home-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .home-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 800px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        h2 {
+            color: #1976d2;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input[type="text"], input[type="date"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus, input[type="date"]:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            background: #1976d2;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        button:hover {
+            background: #1565c0;
+            transform: translateY(-2px);
+        }
+
+        button.active {
+            background: #388e3c;
+        }
+
+        .btn-clear {
+            background: #e53e3e;
+        }
+
+        .btn-clear:hover {
+            background: #d32f2f;
+        }
+
+        .btn-full-width {
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            background: #f8f9fa;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #1976d2;
+        }
+
+        .delete-btn {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .msg {
+            color: #e53e3e;
+            margin-bottom: 1rem;
+            font-style: italic;
+            padding: 0.5rem;
+            background: #ffebee;
+            border-radius: 5px;
+        }
+
+        .success-msg {
+            color: #2e7d32;
+            background: #e8f5e8;
+        }
+
+        .recipe-card {
+            background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%);
+            border: 2px solid #4caf50;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-top: 1rem;
+            position: relative;
+        }
+
+        .recipe-card h3 {
+            color: #2e7d32;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #e53e3e;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .recipe-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .recipe-section h4 {
+            color: #1976d2;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .recipe-card ul, .recipe-card ol {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .recipe-card li {
+            background: none;
+            border: none;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .recipe-card li:last-child {
+            border-bottom: none;
+        }
+
+        .ingredient-missing {
+            color: #e53e3e;
+            font-style: italic;
+        }
+
+        .ingredient-alt {
+            color: #ff9800;
+        }
+
+        .ingredient-optional {
+            color: #757575;
+            font-style: italic;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="#" id="nav-home" class="active">Home</a>
+        <a href="#" id="nav-find">Find a Recipe</a>
+        <a href="#" id="nav-manage">Manage Ingredients</a>
+    </nav>
+
+    <main>
+        <!-- Home Page -->
+        <section id="home" class="page active">
+            <h1>🍲 Smart Recipe Finder</h1>
+            <p>Discover amazing recipes based on ingredients you have at home!</p>
+            
+            <div class="home-cards">
+                <div class="home-card" onclick="showPage('find')">
+                    <h3>🔍 Find Recipes</h3>
+                    <p>Search for recipes using your available ingredients</p>
+                </div>
+                <div class="home-card" onclick="showPage('manage')">
+                    <h3>📦 Manage Pantry</h3>
+                    <p>Add and organize your ingredients</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Find Recipe Page -->
+        <section id="find-page" class="page">
+            <h2>🔍 Find a Recipe</h2>
+            
+            <div class="form-group">
+                <label for="search-ingredient">Ingredient Name</label>
+                <input type="text" id="search-ingredient" placeholder="e.g. onion, chicken, tomato"/>
+            </div>
+            
+            <div class="form-group">
+                <label>Recipe Category</label>
+                <button id="btn-all" class="active">All</button>
+                <button id="btn-veg">Vegetarian</button>
+                <button id="btn-nonveg">Non-Vegetarian</button>
+            </div>
+            
+            <button id="search-btn" class="btn-full-width">🔍 Get Recipe</button>
+            <div id="search-msg" class="msg" style="display: none;"></div>
+            <div id="recipe-result"></div>
+        </section>
+
+        <!-- Manage Ingredients Page -->
+        <section id="manage-page" class="page">
+            <div class="grid">
+                <!-- Add Ingredient -->
+                <div>
+                    <h2>➕ Add Purchased Ingredient</h2>
+                    <div id="add-msg" class="msg" style="display: none;"></div>
+                    
+                    <div class="form-group">
+                        <label for="add-name">Ingredient Name</label>
+                        <input type="text" id="add-name" placeholder="e.g. onion, tomato"/>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="add-date">Date of Purchase</label>
+                        <input type="date" id="add-date"/>
+                    </div>
+                    
+                    <button id="add-btn" class="btn-full-width">Add Item</button>
+                    <button id="clear-btn" class="btn-clear btn-full-width">Clear All Items</button>
+                </div>
+
+                <!-- Your Ingredients -->
+                <div>
+                    <h2>📦 Your Ingredients</h2>
+                    <ul id="purchased-list">
+                        <div class="empty-state">No ingredients added yet.</div>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // ======== NAVIGATION ========
+        const pages = {
+            home: document.getElementById('home'),
+            find: document.getElementById('find-page'),
+            manage: document.getElementById('manage-page')
+        };
+
+        function showPage(key) {
+            // Hide all pages
+            Object.values(pages).forEach(page => page.classList.remove('active'));
+            // Show selected page
+            pages[key].classList.add('active');
+            // Update nav active state
+            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+            document.getElementById('nav-' + key).classList.add('active');
+        }
+
+        // Navigation event listeners
+        document.getElementById('nav-home').onclick = () => showPage('home');
+        document.getElementById('nav-find').onclick = () => showPage('find');
+        document.getElementById('nav-manage').onclick = () => showPage('manage');
+
+        // ======== RECIPE DATABASE (50 RECIPES) ========
+        const recipes = [
+            // VEGETARIAN RECIPES (25)
+            {
+                name: "Palak Paneer",
+                category: "vegetarian",
+                keywords: ["spinach", "palak", "paneer"],
+                ingredients: [
+                    { name: "spinach", required: true },
+                    { name: "paneer", required: true },
+                    { name: "onion", required: true },
+                    { name: "tomato", required: true },
+                    { name: "garlic", required: true },
+                    { name: "ginger", required: true },
+                    { name: "cream", required: false, alternatives: ["milk"] },
+                    { name: "butter", required: true, alternatives: ["oil"] }
+                ],
+                steps: [
+                    "Blanch spinach in boiling water for 2 minutes, then transfer to ice water",
+                    "Blend spinach into a smooth puree",
+                    "Heat butter in pan, sauté onions until golden",
+                    "Add ginger, garlic, cook for 1 minute",
+                    "Add tomatoes, cook until soft",
+                    "Add spinach puree and spices, simmer 3 minutes",
+                    "Add paneer cubes, cook 3-4 minutes",
+                    "Add cream if using, simmer 1 more minute"
+                ]
+            },
+            {
+                name: "Paneer Bhurji",
+                category: "vegetarian", 
+                keywords: ["paneer", "bhurji"],
+                ingredients: [
+                    { name: "paneer", required: true },
+                    { name: "onion", required: true },
+                    { name: "tomato", required: true },
+                    { name: "green chili", required: false },
+                    { name: "ginger", required: false },
+                    { name: "oil", required: true },
+                    { name: "turmeric", required: false },
+                    { name: "salt", required: true }
+                ],
+                steps: [
+                    "Heat oil in pan, sauté chopped onions",
+                    "Add ginger and green chili if using",
+                    "Add tomatoes, cook until soft",
+                    "Add crumbled paneer and spices",
+                    "Cook for 2-3 minutes, garnish with coriander"
+                ]
+            },
+            {
+                name: "Aloo Tikki",
+                category: "vegetarian",
+                keywords: ["potato", "aloo", "tikki"],
+                ingredients: [
+                    { name: "potato", required: true },
+                    { name: "onion", required: false },
+                    { name: "bread crumbs", required: false },
+                    { name: "spices", required: true },
+                    { name: "oil", required: true }
+                ],
+                steps: [
+                    "Boil and mash potatoes",
+                    "Mix with chopped onions and spices",
+                    "Add bread crumbs if using",
+                    "Shape into patties",
+                    "Shallow fry until golden brown"
+                ]
+            },
+            {
+                name: "Vegetable Stir Fry",
+                category: "vegetarian",
+                keywords: ["vegetables", "veggie", "stir fry"],
+                ingredients: [
+                    { name: "mixed vegetables", required: true },
+                    { name: "onion", required: false },
+                    { name: "garlic", required: true },
+                    { name: "soy sauce", required: true },
+                    { name: "oil", required: true },
+                    { name: "salt", required: true },
+                    { name: "pepper", required: false }
+                ],
+                steps: [
+                    "Heat oil in wok",
+                    "Add garlic, fry for 10 seconds",
+                    "Add onions and vegetables",
+                    "Stir fry for 3-4 minutes",
+                    "Add soy sauce and seasonings"
+                ]
+            },
+            {
+                name: "Onion Pakora",
+                category: "vegetarian",
+                keywords: ["onion", "pakora", "fritter"],
+                ingredients: [
+                    { name: "onion", required: true },
+                    { name: "chickpea flour", required: true },
+                    { name: "spices", required: true },
+                    { name: "water", required: true },
+                    { name: "oil", required: true }
+                ],
+                steps: [
+                    "Slice onions thinly",
+                    "Make batter with chickpea flour, spices, and water",
+                    "Mix onions in batter",
+                    "Deep fry spoonfuls until golden",
+                    "Serve hot with chutney"
+                ]
+            },
+            {
+                name: "Tomato Rice",
+                category: "vegetarian",
+                keywords: ["tomato", "rice"],
+                ingredients: [
+                    { name: "rice", required: true },
+                    { name: "tomato", required: true },
+                    { name: "onion", required: true },
+                    { name: "spices", required: true },
+                    { name: "oil", required: true }
+                ],
+                steps: [
+                    "Cook rice separately",
+                    "Heat oil, sauté onions",
+                    "Add tomatoes and spices",
+                    "Cook until tomatoes break down",
+                    "Mix with cooked rice"
+                ]
+            },
+            {
+                name: "Vegetable Fried Rice",
+                category: "vegetarian",
+                keywords: ["rice", "fried rice", "vegetables"],
+                ingredients: [
+                    { name: "rice", required: true },
+                    { name: "mixed vegetables", required: true },
+                    { name: "onion", required: true },
+                    { name: "garlic", required: true },
+                    { name: "soy sauce", required: true },
+                    { name: "oil", required: true }
+                ],
+                steps: [
+                    "Cook rice and let cool",
+                    "Heat oil in wok",
+                    "Stir fry garlic and onions",
+                    "Add vegetables, stir fry",
+                    "Add rice and soy sauce, toss well"
+                ]
+            },
+            {
+                name: "Chole (Chickpea Curry)",
+                category: "vegetarian", 
+                keywords: ["chickpea", "chole", "curry"],
+                ingredients: [
+                    { name: "chickpea", required: true },
+                    { name: "onion", required: true },
+                    { name: "tomato", required: true },
+                    { name: "ginger", required: true },
+                    { name: "garlic", required: true },
+                    { name: "spices", required: true }
+                ],
+                steps: [
+                    "Soak and boil chickpeas",
+                    "Sauté onions, ginger, garlic",
+                    "Add tomatoes and spices",
+                    "Add boiled chickpeas",
+                    "Simmer until thick"
+                ]
+            },
+            {
+                name: "Dal Tadka",
+                category: "vegetarian",
+                keywords: ["lentils", "dal", "tadka"],
+                ingredients: [
+                    { name: "lentils", required: true },
+                    { name: "onion", required: true },
+                    { name: "tomato", required: true },
+                    { name: "garlic", required: true },
+                    { name: "cumin", required: true },
+                    { name: "oil", required: true }
+                ],
+                steps: [
+                    "Boil lentils until soft",
+                    "Heat oil, add cumin seeds",
+                    "Add onions, cook until brown",
+                    "Add garlic and tomatoes",
+                    "Pour over cooked lentils"
+                ]
+            },
+            {
+                name: "Vegetable Curry",
+                category: "vegetarian",
+                keywords: ["vegetables", "curry"],
+                ingredients: [
+                    { name: "mixed vegetables", required: true },
+                    { name: "onion", required: true },
+                    { name: "tomato", required: true },
+                    { name: "coconut milk", required: false },
+                    { name: "spices", required: true }
+                ],
+                steps: [
+                    "Chop all vegetables",
+                    "Sauté onions until golden",
+                    "Add tomatoes and spices",
+                    "Add vegetables and cook",
+                    "Add coconut milk if using"
+                ]
+            },
+            {
+                name: "Stuffed Bell Peppers",
+                category: "vegetarian",
+                keywords: ["bell pepper", "stuffed"],
+                ingredients: [
+                    { name: "bell pepper", required: true },
+                    { name: "rice", required: true },
+                    { name: "onion", required: true },
+                    { name: "tomato", required: true },
+                    { name: "cheese", required: false }
+                ],
+                steps: [
+                    "Cut tops off bell peppers, remove seeds",
+                    "Cook rice with onions and tomatoes",
+                    "Stuff peppers with rice mixture",
+                    "Top with cheese if using",
+                    "Bake until peppers are tender"
+                ]
+            },
+            {
+                name: "Vegetable Biryani",
+                category: "vegetarian",
+                keywords: ["biryani", "rice", "vegetables"],
+                ingredients: [
+                    { name: "basmati rice", required: true },
+                    { name: "mixed vegetables", required: true },
+                    { name: "onion", required: true },
+                    { name: "yogurt", required: true },
+                    { name: "spices", required: true },
+                    { name: "mint", required: false }
+                ],
+                steps: [
+                    "Soak basmati rice",
+                    "Marinate vegetables in yogurt and spices",
+                    "Layer rice and vegetables",
+                    "Cook on low heat",
+                    "Garnish with mint"
+                ]
+            },
+            {
+                name: "Mushroom Curry",
+                category: "vegetarian",
+                keywords: ["mushroom", "curry"],
+                ingredients: [
+                    { name: "mushroom", required: true },
+                    { name: "onion", required: true },
+                    { name: "tomato", required: true },
+                    { name: "cream", required: false },
+                    { name: "spices", required: true }
+                ],
+                steps: [
+                    "Clean and slice mushrooms",
+                    "Sauté onions until golden",
+                    "Add tomatoes and spices",
+                    "Add mushrooms, cook until done",
+                    "Finish with cream if using"
+                ]
+            },
+            {
+                name: "Potato Curry",
+                category: "vegetarian",
+                keywords: ["potato", "curry", "aloo"],
+                ingredients: [
+                    { name: "potato", required: true },
+                    { name: "onion", required: true },
+                    { name: "tomato", required: true },
+                    { name: "ginger", required: true },
+                    { name: "spices", required: true }
+                ],
+                steps: [
+                    "Cube and parboil potatoes",
+                    "Sauté onions and ginger",
+                    "Add tomatoes and spices",
+                    "Add potatoes and simmer",
+                    "Cook until potatoes are tender"
+                ]
+            },
+            {
+                name: "Cabbage Stir Fry",
+                category: "vegetarian",
+                keywords: ["cabbage", "stir fry"],
+                ingredients: [
+                    { name: "cabbage", required: true },
+                    { name: "onion", required: true },
+                    { name: "mustard seeds", required: true },
+                    { name: "curry leaves", required: false },
+                    { name: "oil", required: true }
+                ],
+                steps: [
+                    "Shred cabbage finely",
+                    "Heat oil, add mustard seeds",
+                    "Add curry leaves and onions",
+                    "Add cabbage, stir fry",
+                    "Season with salt"
+                ]
+            },
+            {
+                name: "Corn Soup",
+                category: "vegetarian",
+                keywords: ["corn", "soup"],
+                ingredients: [
+                    { name: "corn", required: true },
+                    { name: "onion", required: false },
+                    { name: "milk", required: true },
+                    { name: "butter", required: true },
+                    { name: "salt", required: true },
+                    { name: "pepper", required: true }
+                ],
+                steps: [
+                    "Boil corn kernels",
+                    "Blend into smooth puree",
+                    "Sauté onions in butter",
+                    "Add corn puree and milk",
+                    "Season and simmer"
+                ]
+            },
+            {
+                name: "Paneer Tikka",
+                category: "vegetarian",
+                keywords: ["paneer", "tikka", "grilled"],
+                ingredients: [
+                    { name: "paneer", required: true },
+                    { name: "yogurt", required: true },
+                    { name: "bell pepper", required: false },
+                    { name: "onion", required: false },
+                    { name: "spices", required: true }
+                ],
+                steps: [
+                    "Cut paneer into cubes",
+                    "Marinate in yogurt and spices",
+                    "Thread on skewers with vegetables",
+                    "Grill or roast until golden",
+                    "Serve with mint chutney"
+                ]
+            },
+            {
+                name: "Vegetable Soup",
+                category: "vegetarian",
+                keywords: ["vegetables", "soup"],
+                ingredients: [
+                    { name: "mixed vegetables", required: true },
+                    { name: "onion", required: true },
+                    { name: "garlic", required: true },
+                    { name: "vegetable broth", required: true },
+                    { name: "herbs", required: false }
+                ],
+                steps: [
+                    "Chop all vegetables",
+                    "Sauté onions and garlic",
+                    "Add vegetables and broth",
+                    "Simmer until vegetables are tender",
+                    "Season with herbs"
+                ]
+            },
+            {
+                name: "Rajma (Kidney Bean Curry)",
+                category: "vegetarian",
+                keywords: ["rajma", "kidney beans", "curry"],
+                ingredients: [
+                    { name: "kidney beans", required: true },
+                    { name: "onion", required: true },
+                    { name: "tomato", required: true },
+                    { name: "ginger", required: true },
+                    { name: "garlic", required: true },
+                    { name: "spices", required: true }
+                ],
+                steps: [
+                    "Soak kidney beans overnight, then boil",
+                    "Sauté onions, ginger, garlic",
+                    "Add tomatoes and spices",
+                    "Add boiled beans",
+                    "Simmer until thick"
+                ]
+            },
+            {
+                name: "Vegetable Pulao",
+                category: "vegetarian",
+                keywords: ["pulao", "rice", "vegetables"],
+                ingredients: [
+                    { name: "basmati rice", required: true },
+                    { name: "mixed vegetables", required: true },
+                    { name: "whole spices", required: true },
+                    { name: "onion", required: true },
+                    { name: "oil", required: true }
+                ],
+                steps: [
+                    "Wash and soak rice",
+                    "Heat oil, add whole spices",
+                    "Add onions and vegetables",
+                    "Add rice and water",
+                    "Cook until rice is done"
+                ]
+            },
+            {
+                name: "Gobi Manchurian",
+                category: "vegetarian",
+                keywords: ["cauliflower", "gobi", "manchurian"],
+                ingredients: [
+                    { name: "cauliflower", required: true },
+                    { name: "flour", required: true },
+                    { name: "soy sauce", required: true },
+                    { name: "garlic", required: true },
+                    { name: "green chili", required: true },
+                    { name: "oil", required: true }
+                ],
+                steps: [
+                    "Cut cauliflower into florets",
+                    "Make batter with flour and spices",
+                    "Deep fry coated cauliflower",
+                    "Make sauce with soy sauce, garlic, chili",
+                    "Toss fried cauliflower in sauce"
+                ]
+            },
+            {
+                name: "Mixed Vegetable Sabzi",
+                category: "vegetarian",
+                keywords: ["mixed vegetables", "sabzi"],
+                ingredients: [
+                    { name: "potato", required: true },
+                    { name: "cauliflower", required: true },
+                    { name: "peas", required: true },
+                    { name: "onion", required: true },
+                    { name: "spices", required: true }
+                ],
+                steps: [
+                    "Chop all vegetables",
+                    "Heat oil, add spices",
+                    "Add onions, cook until golden",
+                    "Add vegetables in order of cooking time",
+                    "Cover and cook until done"
+                ]
+            },
+            {
+                name: "Palak Dal",
+                category: "vegetarian",
+                keywords: ["spinach", "palak", "dal", "lentils"],
+                ingredients: [
+                    { name: "lentils", required: true },
+                    { name: "spinach", required: true },
+                    { name: "onion", required: true },
+                    { name: "tomato", required: true },
+                    { name: "garlic", required: true },
+                    { name: "spices", required: true }
+                ],
+                steps: [
+                    "Cook lentils until soft",
+                    "Blanch and puree spinach",
+                    "Sauté onions, garlic, tomatoes",
+                    "Mix spinach puree with lentils",
+                    "Add spices and simmer"
+                ]
+            },
+            {
+                name: "Vegetable Sandwich",
+                category: "vegetarian",
+                keywords: ["sandwich", "vegetables"],
+                ingredients: [
+                    { name: "bread", required: true },
+                    { name: "cucumber", required: true },
+                    { name: "tomato", required: true },
+                    { name: "onion", required: true },
+                    { name: "butter", required: true },
+                    { name: "chutney", required: false }
+                ],
+                steps: [
+                    "Slice all vegetables thinly",
+                    "Apply butter and chutney on bread",
+                    "Layer vegetables between bread slices",
+                    "Cut into triangles",
+                    "Serve fresh or grilled"
+                ]
+            },
+            {
+                name: "Jeera Rice",
+                category: "vegetarian",
+                keywords: ["jeera", "cumin", "rice"],
+                ingredients: [
+                    { name: "basmati rice", required: true },
+                    { name: "cumin seeds", required: true },
+                    { name: "bay leaves", required: false },
+                    { name: "onion", required: false },
+                    { name: "oil", required: true }
+                ],
+                steps: [
+                    "Wash and soak rice",
+                    "Heat oil, add cumin seeds",
+                    "Add bay leaves and onions if using",
+                    "Add rice and water",
+                    "Cook until rice is fluffy"
+                ]
+            },
+
+            // NON-VEGETARIAN RECIPES (25)
+            {
+                name: "Butter Chicken",
+                category: "non-vegetarian",
+                keywords: ["chicken", "butter chicken"],
+                ingredients: [
+                    { name: "chicken", required: true },
+                    { name: "butter", required: true },
+                    { name: "onion", required: true },
+                    { name: "tomato", required: true },
+                    { name: "cream", required: false, alternatives: ["milk"] },
+                    { name: "garlic", required: true },
+                    { name: "ginger", required: true },
+                    { name: "spices", required: true }
+                ],
+                steps: [
+                    "Marinate chicken in yogurt and spices",
+                    "Sauté onions in butter until golden",
+                    "Add ginger, garlic, cook 1 minute",
+                    "Add tomatoes and spices",
+                    "Add chicken, cook until done",
+                    "Finish with cream, simmer 2-3 minutes"
+                ]
+            },
+            {
+                name: "Scrambled Eggs",
+                category: "non-vegetarian",
+                keywords: ["eggs", "scrambled"],
+                ingredients: [
+                    { name: "eggs", required: true },
+                    { name: "onion", required: false },
+                    { name: "tomato", required: false },
+                    { name: "butter", required: true, alternatives: ["oil"] },
+                    { name: "milk", required: false },
+                    { name: "salt", required: true },
+                    { name: "pepper", required: true }
+                ],
+                steps: [
+                    "Beat eggs with milk if using",
+                    "Heat butter in non-stick pan",
+                    "Add onions and tomatoes if using",
+                    "Pour in eggs, scramble gently",
+                    "Season with salt and pepper"
+                ]
+            },
+            {
+                name: "Chicken Curry",
+                category: "non-vegetarian",
+                keywords: ["chicken", "curry"],
+                ingredients: [
+                    { name: "chicken", required: true },
+                    { name: "onion", required: true },
+                    { name: "tomato", required: true },
+                    { name: "garlic", required: true },
+                    { name: "ginger", required: true },
+                    { name: "spices", required: true },
+                    { name: "oil", required: true }
+                ],
+                steps: [
+                    "Cut chicken into pieces",
+                    "Heat oil, sauté onions until golden",
+                    "Add garlic, ginger, cook 1 minute",
+                    "Add tomatoes and spices",
+                    "Add chicken, cook until tender",
+                    "Simmer until sauce thickens"
+                ]
+            },
+            {
+                name: "Fish Curry",
+                category: "non-vegetarian",
+                keywords: ["fish", "curry"],
+                ingredients: [
+                    { name: "fish", required: true },
+                    { name: "coconut milk", required: true },
+                    { name: "onion", required: true },
+                    { name: "tomato", required: true },
+                    { name: "ginger", required: true },
+                    { name: "spices", required: true }
+                ],
+                steps: [
+                    "Cut fish into pieces",
+                    "Sauté onions and ginger",
+                    "Add tomatoes and spices",
+                    "Add coconut milk",
+                    "Gently add fish, simmer until cooked"
+                ]
+            },
+            {
+                name: "Chicken Biryani",
+                category: "non-vegetarian",
+                keywords: ["chicken", "biryani", "rice"],
+                ingredients: [
+                    { name: "chicken", required: true },
+                    { name: "basmati rice", required: true },
+                    { name: "onion", required: true },
+                    { name: "yogurt", required: true },
+                    { name: "spices", required: true },
+                    { name: "mint", required: false }
+                ],
+                steps: [
+                    "Marinate chicken in yogurt and spices",
+                    "Cook rice with whole spices",
+                    "Cook chicken separately",
+                    "Layer rice and chicken",
+                    "Cook on low heat, garnish with mint"
+                ]
+            },
+            {
+                name: "Egg Curry",
+                category: "non-vegetarian",
+                keywords: ["egg", "curry"],
+                ingredients: [
+                    { name: "eggs", required: true },
+                    { name: "onion", required: true },
+                    { name: "tomato", required: true },
+                    { name: "coconut milk", required: false },
+                    { name: "spices", required: true }
+                ],
+                steps: [
+                    "Boil eggs, peel and set aside",
+                    "Sauté onions until golden",
+                    "Add tomatoes and spices",
+                    "Add coconut milk if using",
+                    "Add eggs, simmer gently"
+                ]
+            },
+            {
+                name: "Chicken Fried Rice",
+                category: "non-vegetarian",
+                keywords: ["chicken", "fried rice", "rice"],
+                ingredients: [
+                    { name: "chicken", required: true },
+                    { name: "rice", required: true },
+                    { name: "eggs", required: false },
+                    { name: "onion", required: true },
+                    { name: "soy sauce", required: true },
+                    { name: "oil", required: true }
+                ],
+                steps: [
+                    "Cook rice and let cool",
+                    "Cut chicken into small pieces",
+                    "Stir fry chicken until cooked",
+                    "Add eggs if using, scramble",
+                    "Add rice and soy sauce, toss well"
+                ]
+            },
+            {
+                name: "Mutton Curry",
+                category: "non-vegetarian",
+                keywords: ["mutton", "goat", "lamb", "curry"],
+                ingredients: [
+                    { name: "mutton", required: true },
+                    { name: "onion", required: true },
+                    { name: "tomato", required: true },
+                    { name: "garlic", required: true },
+                    { name: "ginger", required: true },
+                    { name: "yogurt", required: false },
+                    { name: "spices", required: true }
+                ],
+                steps: [
+                    "Cut mutton into pieces",
+                    "Sauté onions until golden",
+                    "Add ginger, garlic, tomatoes",
+                    "Add mutton and spices",
+                    "Add yogurt if using, cook until tender"
+                ]
+            },
+            {
+                name: "Chicken Tikka",
+                category: "non-vegetarian",
+                keywords: ["chicken", "tikka", "grilled"],
+                ingredients: [
+                    { name: "chicken", required: true },
+                    { name: "yogurt", required: true },
+                    { name: "lemon juice", required: true },
+                    { name: "garlic", required: true },
+                    { name: "ginger", required: true },
+                    { name: "spices", required: true }
+                ],
+                steps: [
+                    "Cut chicken into cubes",
+                    "Marinate in yogurt, lemon, spices",
+                    "Thread on skewers",
+                    "Grill or roast until cooked",
+                    "Serve with mint chutney"
+                ]
+            },
+            {
+                name: "Fish Fry",
+                category: "non-vegetarian",
+                keywords: ["fish", "fry", "fried"],
+                ingredients: [
+                    { name: "fish", required: true },
+                    { name: "turmeric", required: true },
+                    { name: "chili powder", required: true },
+                    { name: "salt", required: true },
+                    { name: "oil", required: true },
+                    { name: "lemon juice", required: false }
+                ],
+                steps: [
+                    "Clean and slice fish",
+                    "Marinate with turmeric, chili, salt",
+                    "Heat oil in pan",
+                    "Fry fish until golden on both sides",
+                    "Sprinkle lemon juice before serving"
+                ]
+            },
+            {
+                name: "Chicken Soup",
+                category: "non-vegetarian",
+                keywords: ["chicken", "soup"],
+                ingredients: [
+                    { name: "chicken", required: true },
+                    { name: "vegetables", required: false },
+                    { name: "onion", required: true },
+                    { name: "garlic", required: true },
+                    { name: "chicken broth", required: true },
+                    { name: "herbs", required: false }
+                ],
+                steps: [
+                    "Boil chicken to make broth",
+                    "Shred cooked chicken",
+                    "Sauté onions and garlic",
+                    "Add vegetables if using",
+                    "Add broth and chicken, simmer"
+                ]
+            },
+            {
+                name: "Prawn Curry",
+                category: "non-vegetarian",
+                keywords: ["prawn", "shrimp", "curry"],
+                ingredients: [
+                    { name: "prawns", required: true },
+                    { name: "coconut milk", required: true },
+                    { name: "onion", required: true },
+                    { name: "tomato", required: true },
+                    { name: "curry leaves", required: false },
+                    { name: "spices", required: true }
+                ],
+                steps: [
+                    "Clean and devein prawns",
+                    "Sauté onions until golden",
+                    "Add tomatoes and spices",
+                    "Add coconut milk",
+                    "Add prawns, cook until done"
+                ]
+            },
+            {
+                name: "Chicken Tandoori",
+                category: "non-vegetarian",
+                keywords: ["chicken", "tandoori"],
+                ingredients: [
+                    { name: "chicken", required: true },
+                    { name: "yogurt", required: true },
+                    { name: "lemon juice", required: true },
+                    { name: "garlic", required: true },
+                    { name: "ginger", required: true },
+                    { name: "tandoori masala", required: true }
+                ],
+                steps: [
+                    "Make cuts in chicken pieces",
+                    "Marinate in yogurt, lemon, spices",
+                    "Let marinate for at least 2 hours",
+                    "Roast in oven or grill",
+                    "Cook until charred and cooked through"
+                ]
+            },
+            {
+                name: "Egg Biryani",
+                category: "non-vegetarian",
+                keywords: ["egg", "biryani", "rice"],
+                ingredients: [
+                    { name: "eggs", required: true },
+                    { name: "basmati rice", required: true },
+                    { name: "onion", required: true },
+                    { name: "yogurt", required: true },
+                    { name: "spices", required: true },
+                    { name: "mint", required: false }
+                ],
+                steps: [
+                    "Boil eggs, peel and fry lightly",
+                    "Cook rice with whole spices",
+                    "Make gravy with onions and spices",
+                    "Layer rice and eggs with gravy",
+                    "Cook on low heat"
+                ]
+            },
+            {
+                name: "Chicken Stir Fry",
+                category: "non-vegetarian",
+                keywords: ["chicken", "stir fry"],
+                ingredients: [
+                    { name: "chicken", required: true },
+                    { name: "bell peppers", required: false },
+                    { name: "onion", required: true },
+                    { name: "garlic", required: true },
+                    { name: "soy sauce", required: true },
+                    { name: "oil", required: true }
+                ],
+                steps: [
+                    "Cut chicken into strips",
+                    "Heat oil in wok",
+                    "Stir fry chicken until cooked",
+                    "Add vegetables and garlic",
+                    "Add soy sauce, toss well"
+                ]
+            },
+            {
+                name: "Mutton Biryani",
+                category: "non-vegetarian",
+                keywords: ["mutton", "biryani", "rice"],
+                ingredients: [
+                    { name: "mutton", required: true },
+                    { name: "basmati rice", required: true },
+                    { name: "onion", required: true },
+                    { name: "yogurt", required: true },
+                    { name: "saffron", required: false },
+                    { name: "spices", required: true }
+                ],
+                steps: [
+                    "Marinate mutton in yogurt and spices",
+                    "Cook mutton until tender",
+                    "Cook rice with whole spices",
+                    "Layer rice and mutton",
+                    "Cook on low heat with saffron"
+                ]
+            },
+            {
+                name: "Fish Curry with Coconut",
+                category: "non-vegetarian",
+                keywords: ["fish", "coconut", "curry"],
+                ingredients: [
+                    { name: "fish", required: true },
+                    { name: "coconut", required: true },
+                    { name: "green chili", required: true },
+                    { name: "ginger", required: true },
+                    { name: "curry leaves", required: false },
+                    { name: "tamarind", required: true }
+                ],
+                steps: [
+                    "Grind coconut with green chili and ginger",
+                    "Extract thick coconut milk",
+                    "Boil tamarind water with curry leaves",
+                    "Add coconut paste and simmer",
+                    "Add fish pieces and cook gently"
+                ]
+            },
+            {
+                name: "Chicken Korma",
+                category: "non-vegetarian",
+                keywords: ["chicken", "korma"],
+                ingredients: [
+                    { name: "chicken", required: true },
+                    { name: "yogurt", required: true },
+                    { name: "onion", required: true },
+                    { name: "cashews", required: true },
+                    { name: "cream", required: false },
+                    { name: "spices", required: true }
+                ],
+                steps: [
+                    "Marinate chicken in yogurt",
+                    "Fry onions until golden, cool and grind",
+                    "Grind cashews to paste",
+                    "Cook chicken with onion and cashew paste",
+                    "Finish with cream if using"
+                ]
+            },
+            {
+                name: "Egg Fried Rice",
+                category: "non-vegetarian",
+                keywords: ["egg", "fried rice", "rice"],
+                ingredients: [
+                    { name: "eggs", required: true },
+                    { name: "rice", required: true },
+                    { name: "onion", required: true },
+                    { name: "garlic", required: true },
+                    { name: "soy sauce", required: true },
+                    { name: "oil", required: true }
+                ],
+                steps: [
+                    "Cook rice and let cool",
+                    "Beat eggs and scramble",
+                    "Heat oil, stir fry garlic and onions",
+                    "Add rice and scrambled eggs",
+                    "Season with soy sauce"
+                ]
+            },
+            {
+                name: "Chicken Jalfrezi",
+                category: "non-vegetarian",
+                keywords: ["chicken", "jalfrezi"],
+                ingredients: [
+                    { name: "chicken", required: true },
+                    { name: "bell peppers", required: true },
+                    { name: "onion", required: true },
+                    { name: "tomato", required: true },
+                    { name: "ginger", required: true },
+                    { name: "spices", required: true }
+                ],
+                steps: [
+                    "Cut chicken and vegetables into strips",
+                    "Stir fry chicken until cooked",
+                    "Remove chicken, add vegetables",
+                    "Stir fry vegetables until crisp-tender",
+                    "Mix chicken back with vegetables"
+                ]
+            },
+            {
+                name: "Fish Tikka",
+                category: "non-vegetarian",
+                keywords: ["fish", "tikka", "grilled"],
+                ingredients: [
+                    { name: "fish", required: true },
+                    { name: "yogurt", required: true },
+                    { name: "lemon juice", required: true },
+                    { name: "garlic", required: true },
+                    { name: "spices", required: true },
+                    { name: "oil", required: true }
+                ],
+                steps: [
+                    "Cut fish into cubes",
+                    "Marinate in yogurt, lemon, and spices",
+                    "Thread on skewers",
+                    "Brush with oil",
+                    "Grill until cooked through"
+                ]
+            },
+            {
+                name: "Chicken Pulao",
+                category: "non-vegetarian",
+                keywords: ["chicken", "pulao", "rice"],
+                ingredients: [
+                    { name: "chicken", required: true },
+                    { name: "basmati rice", required: true },
+                    { name: "onion", required: true },
+                    { name: "whole spices", required: true },
+                    { name: "mint", required: false },
+                    { name: "oil", required: true }
+                ],
+                steps: [
+                    "Cook chicken pieces until done",
+                    "In same pot, add whole spices and onions",
+                    "Add washed rice",
+                    "Add water and cooked chicken",
+                    "Cook until rice is done"
+                ]
+            },
+            {
+                name: "Mutton Keema",
+                category: "non-vegetarian",
+                keywords: ["mutton", "keema", "minced"],
+                ingredients: [
+                    { name: "minced mutton", required: true },
+                    { name: "onion", required: true },
+                    { name: "tomato", required: true },
+                    { name: "peas", required: false },
+                    { name: "ginger", required: true },
+                    { name: "spices", required: true }
+                ],
+                steps: [
+                    "Heat oil, sauté onions until golden",
+                    "Add ginger and spices",
+                    "Add minced mutton, cook well",
+                    "Add tomatoes, cook until oil separates",
+                    "Add peas if using, cook until done"
+                ]
+            },
+            {
+                name: "Chicken Kofta Curry",
+                category: "non-vegetarian",
+                keywords: ["chicken", "kofta", "curry"],
+                ingredients: [
+                    { name: "minced chicken", required: true },
+                    { name: "onion", required: true },
+                    { name: "tomato", required: true },
+                    { name: "yogurt", required: true },
+                    { name: "cream", required: false },
+                    { name: "spices", required: true }
+                ],
+                steps: [
+                    "Make koftas with minced chicken and spices",
+                    "Deep fry koftas until golden",
+                    "Make gravy with onions, tomatoes, yogurt",
+                    "Add fried koftas to gravy",
+                    "Simmer and finish with cream"
+                ]
+            }
+        ];
+
+        // ======== LOCAL STORAGE FUNCTIONS ========
+        function loadPurchased() {
+            try {
+                return JSON.parse(localStorage.getItem('purchasedItems') || '[]');
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function savePurchased(arr) {
+            try {
+                localStorage.setItem('purchasedItems', JSON.stringify(arr));
+            } catch (e) {
+                showMessage('Unable to save data', 'add-msg');
+            }
+        }
+
+        // ======== INGREDIENT MANAGEMENT ========
+        function renderPurchased() {
+            const list = document.getElementById('purchased-list');
+            const items = loadPurchased();
+
+            if (items.length === 0) {
+                list.innerHTML = '<div class="empty-state">No ingredients added yet.</div>';
+                return;
+            }
+
+            list.innerHTML = items.map((item, index) => `
+                <li>
+                    <div>
+                        <strong>${item.name}</strong>
+                        ${item.date ? `<br><small>Added: ${formatDate(item.date)}</small>` : ''}
+                    </div>
+                    <button class="delete-btn" onclick="deleteItem(${index})" title="Delete">✕</button>
+                </li>
+            `).join('');
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString();
+        }
+
+        function addItem() {
+            const nameInput = document.getElementById('add-name');
+            const dateInput = document.getElementById('add-date');
+            const name = nameInput.value.trim().toLowerCase();
+            const date = dateInput.value;
+
+            if (!name) {
+                showMessage('Please enter ingredient name', 'add-msg');
+                return;
+            }
+
+            const items = loadPurchased();
+            if (items.some(item => item.name === name)) {
+                showMessage('Ingredient already exists', 'add-msg');
+                return;
+            }
+
+            items.push({ name, date });
+            savePurchased(items);
+            renderPurchased();
+
+            nameInput.value = '';
+            dateInput.value = '';
+            showMessage('Ingredient added successfully!', 'add-msg', 'success');
+        }
+
+        function deleteItem(index) {
+            const items = loadPurchased();
+            items.splice(index, 1);
+            savePurchased(items);
+            renderPurchased();
+            showMessage('Ingredient removed', 'add-msg', 'success');
+        }
+
+        function clearAllItems() {
+            if (confirm('Clear all ingredients?')) {
+                localStorage.removeItem('purchasedItems');
+                renderPurchased();
+                showMessage('All ingredients cleared', 'add-msg', 'success');
+            }
+        }
+
+        function showMessage(message, elementId, type = 'error') {
+            const msgElement = document.getElementById(elementId);
+            msgElement.textContent = message;
+            msgElement.style.display = 'block';
+            msgElement.className = type === 'success' ? 'msg success-msg' : 'msg';
+            setTimeout(() => {
+                msgElement.style.display = 'none';
+            }, 3000);
+        }
+
+        // ======== RECIPE SEARCH ========
+        let currentCategory = 'all';
+
+        function updateCategory(category) {
+            currentCategory = category;
+            document.querySelectorAll('#find-page button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(`btn-${category === 'all' ? 'all' : category === 'vegetarian' ? 'veg' : 'nonveg'}`).classList.add('active');
+        }
+
+        function searchRecipes() {
+            const input = document.getElementById('search-ingredient').value.trim().toLowerCase();
+            const resultDiv = document.getElementById('recipe-result');
+            
+            resultDiv.innerHTML = '';
+            
+            if (!input) {
+                showMessage('Please enter an ingredient name', 'search-msg');
+                return;
+            }
+
+            const matchedRecipes = recipes.filter(recipe => {
+                const matchesCategory = currentCategory === 'all' || recipe.category === currentCategory;
+                const matchesKeyword = recipe.keywords.some(keyword => 
+                    keyword.includes(input) || input.includes(keyword)
+                );
+                return matchesCategory && matchesKeyword;
+            });
+
+            if (matchedRecipes.length === 0) {
+                showMessage('No recipes found for this ingredient and category', 'search-msg');
+                return;
+            }
+
+            // Display first matching recipe
+            displayRecipe(matchedRecipes[0], resultDiv);
+            document.getElementById('search-ingredient').value = '';
+            document.getElementById('search-msg').style.display = 'none';
+        }
+
+        function displayRecipe(recipe, container) {
+            const userItems = loadPurchased().map(item => item.name.toLowerCase());
+
+            const ingredientsHtml = recipe.ingredients.map(ingredient => {
+                const hasIngredient = userItems.includes(ingredient.name.toLowerCase());
+                let alternativeText = '';
+                
+                if (!hasIngredient && ingredient.alternatives) {
+                    const foundAlt = ingredient.alternatives.find(alt => 
+                        userItems.includes(alt.toLowerCase())
+                    );
+                    if (foundAlt) {
+                        alternativeText = ` <span class="ingredient-alt">(use ${foundAlt} as alternative)</span>`;
+                    }
+                }
+
+                const optionalText = !ingredient.required ? 
+                    ' <span class="ingredient-optional">(optional)</span>' : '';
+                
+                const missingText = (!hasIngredient && !alternativeText && ingredient.required) ? 
+                    ' <span class="ingredient-missing">(not available)</span>' : '';
+
+                return `<li>${ingredient.name}${alternativeText}${optionalText}${missingText}</li>`;
+            }).join('');
+
+            const stepsHtml = recipe.steps.map(step => `<li>${step}</li>`).join('');
+
+            container.innerHTML = `
+                <div class="recipe-card">
+                    <button class="close-btn" onclick="closeRecipe()">✕</button>
+                    <h3>${recipe.name} (${recipe.category})</h3>
+                    
+                    <div class="recipe-section">
+                        <h4>🥘 Ingredients</h4>
+                        <ul>${ingredientsHtml}</ul>
+                    </div>
+                    
+                    <div class="recipe-section">
+                        <h4>👩‍🍳 Cooking Steps</h4>
+                        <ol>${stepsHtml}</ol>
+                    </div>
+                </div>
+            `;
+        }
+
+        function closeRecipe() {
+            document.getElementById('recipe-result').innerHTML = '';
+        }
+
+        // ======== EVENT LISTENERS ========
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set today's date
+            document.getElementById('add-date').valueAsDate = new Date();
+            
+            // Render ingredients
+            renderPurchased();
+
+            // Ingredient management
+            document.getElementById('add-btn').addEventListener('click', addItem);
+            document.getElementById('clear-btn').addEventListener('click', clearAllItems);
+
+            // Recipe search
+            document.getElementById('search-btn').addEventListener('click', searchRecipes);
+            document.getElementById('btn-all').addEventListener('click', () => updateCategory('all'));
+            document.getElementById('btn-veg').addEventListener('click', () => updateCategory('vegetarian'));
+            document.getElementById('btn-nonveg').addEventListener('click', () => updateCategory('non-vegetarian'));
+
+            // Enter key support
+            document.getElementById('add-name').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') addItem();
+            });
+
+            document.getElementById('search-ingredient').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') searchRecipes();
+            });
+        });
+
+        // Make functions globally accessible
+        window.deleteItem = deleteItem;
+        window.closeRecipe = closeRecipe;
+        window.showPage = showPage;
+    </script>
+</body>
+</html>
